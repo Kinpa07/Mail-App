@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Django
+db.sqlite3
+/static/
+media/
+
+# Environment
+.env
+venv/
+.env.*
+
+# VSCode or JetBrains configs
+.vscode/
+.idea/
+
+# Migrations
+**/migrations/*.py
+!**/migrations/__init__.py
