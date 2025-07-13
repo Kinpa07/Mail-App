@@ -55,22 +55,50 @@ function compose_email() {
     email_div.addEventListener('click', async () => {
       const response = await fetch(`/emails/${email_div.dataset.id}`);
       const email = await response.json();
+      const archiveButton = document.createElement('button');
+      archiveButton.className = 'btn btn-sm btn-outline-primary mt-2';
+      archiveButton.innerText = email.archived ? "Unarchive" : "Archive";
+      const replyButton = document.createElement('button');
+      replyButton.className = 'btn btn-sm btn-outline-primary mt-2 ml-2';
+      replyButton.innerText = 'Reply';
+      
       await fetch(`/emails/${email_div.dataset.id}`, {
         method : 'PUT',
         body: JSON.stringify({read : true})
       })
+      if (mailbox != 'sent'){
+      archiveButton.addEventListener('click', async () => {
+      await fetch(`/emails/${email.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ archived: !email.archived })
+      });
+      load_mailbox('inbox');
+})};
+      replyButton.addEventListener('click', async() =>{
+      document.querySelector('#compose-view').style.display = 'block';
+      document.querySelector('#emails-view').style.display = 'none';
+      document.querySelector('#email-single-view').style.display = 'none';
+      document.querySelector('#compose-recipients').value = email.sender;
+      document.querySelector('#compose-subject').value = email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`
+      document.querySelector('#compose-body').value = `\n\nOn ${email.timestamp} ${email.sender} wrote:\n${email.body}`;
+      document.querySelector('#compose-body').focus();
+      document.querySelector('#compose-body').setSelectionRange(0, 0);
+      })
       const single_email = document.createElement('div')
-      single_email.innerHTML = `
-      <div><strong>From:</strong> ${email.sender}</div>
-      <div><strong>To:</strong> ${email.recipients.join(', ')}</div>
-      <div><strong>Subject:</strong> ${email.subject}</div>
-      <div><strong>Timestamp:</strong> ${email.timestamp}</div>
-      <hr>
-      <div>${email.body}</div>     
-      `;
+
+single_email.innerHTML = `
+  <div><strong>From:</strong> ${email.sender}</div>
+  <div><strong>To:</strong> ${email.recipients.join(', ')}</div>
+  <div><strong>Subject:</strong> ${email.subject}</div>
+  <div><strong>Timestamp:</strong> ${email.timestamp}</div>
+  <hr>
+  <pre class="email-body">${email.body}</pre>
+`;
       const singleEmailView = document.querySelector('#email-single-view');
       singleEmailView.innerHTML = '';
       singleEmailView.appendChild(single_email);
+      singleEmailView.appendChild(archiveButton);
+      singleEmailView.appendChild(replyButton);
       singleEmailView.style.display = 'block';
       document.querySelector('#emails-view').style.display = 'none'
       document.querySelector('#compose-view').style.display = 'none'

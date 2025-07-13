@@ -3,6 +3,16 @@ textarea {
 }
 
 .email-item:hover {
-  background-color: #007bff !important; /* light gray background on hover */
-  cursor: pointer; /* show pointer cursor */
+  background-color: #007bff !important; 
+  cursor: pointer; 
+}
+
+.email-body {
+  white-space: pre-wrap;  
+  font-family: inherit;    
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  background-color: #f8f9fa; 
+  border-radius: 4px;
 }
