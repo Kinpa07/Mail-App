@@ -18,6 +18,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-single-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -31,6 +32,7 @@ function compose_email() {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-single-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -39,7 +41,9 @@ function compose_email() {
   const emails = await response.json()
   emails.forEach(email => {
     const email_div = document.createElement('div');
+    email_div.dataset.id = email.id;
     email_div.className = 'border border-primary rounded p-3 mt-3';
+    email_div.classList.add('email-item');
     if (email.read) {
       email_div.classList.add('bg-light')
     } else{
@@ -47,6 +51,30 @@ function compose_email() {
     }
     email_div.innerHTML = `<strong>${email.subject}</strong> from ${email.sender} at ${email.timestamp}`
     document.querySelector('#emails-view').appendChild(email_div)
+
+    email_div.addEventListener('click', async () => {
+      const response = await fetch(`/emails/${email_div.dataset.id}`);
+      const email = await response.json();
+      await fetch(`/emails/${email_div.dataset.id}`, {
+        method : 'PUT',
+        body: JSON.stringify({read : true})
+      })
+      const single_email = document.createElement('div')
+      single_email.innerHTML = `
+      <div><strong>From:</strong> ${email.sender}</div>
+      <div><strong>To:</strong> ${email.recipients.join(', ')}</div>
+      <div><strong>Subject:</strong> ${email.subject}</div>
+      <div><strong>Timestamp:</strong> ${email.timestamp}</div>
+      <hr>
+      <div>${email.body}</div>     
+      `;
+      const singleEmailView = document.querySelector('#email-single-view');
+      singleEmailView.innerHTML = '';
+      singleEmailView.appendChild(single_email);
+      singleEmailView.style.display = 'block';
+      document.querySelector('#emails-view').style.display = 'none'
+      document.querySelector('#compose-view').style.display = 'none'
+    })
   });
 }
 
